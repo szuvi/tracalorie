@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tracalorie</title>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav>
+    <div class="nav-wrapper blue darken-2">
+      <div class="container">
+        <a href="#" class="brand-logo left">Tracalorie</a>
+        <ul class="right">
+          <li><a id="clear-btn" class="btn waves-effect waves-light light-blue accent-1">Clear All</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+
+  <main class="container">
+    <div class="row">
+
+      <!-- Error Card (temporary, to be replaced) -->
+
+      <div id="error-card" class="hide card col m8 offset-m2 red darken-3">
+        <div class="valign-wrapper">
+          <i class="white-text small material-icons">error_outline</i>
+          <p class="white-text" id="error-msg">
+            <!-- Error message goes here -->
+          </p>
+        </div>
+      </div>
+
+      <!-- Card - form -->
+
+      <div class="card col m8 offset-m2">
+        <div class="card-content">
+          <h4>Add Meal / Food Item</h4>
+          <div class="row">
+            <form id="task-form">
+              <div class="input-field col s12 m6">
+                <input type="text" name="meal-input" id="meal-input" class="validate" required />
+                <label for="meal-input">Meal</label>
+              </div>
+              <div class="input-field col s12 m6">
+                <input type="number" name="calories-input" id="calories-input" class="validate" required />
+                <label for="calories-input">Calories</label>
+              </div>
+            </form>
+
+            <!-- Buttons -->
+            <div>
+            <a id="add-btn" class=" waves-effect waves-light btn blue darken-3"><i class="material-icons left">add</i>Add
+              Meal</a>
+            
+          <a id="edit-btn" class="hide waves-effect waves-light btn yellow darken-2"><i class="material-icons left">edit</i>Edit Meal</a>
+          <a id="delete-btn" class="hide waves-effect waves-light btn red darken-3"><i class="material-icons left">clear</i>Delete Meal</a>
+          
+            <a id="back-btn" class="hide waves-effect waves-light btn right blue-grey lighten-2"><i
+                class="material-icons left">arrow_back</i>Back</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calories Count -->
+    <h3 class="center-align">Total Calories: <span id="calories-count">0</span></h3>
+
+    <!-- Meals List -->
+    <div class="row">
+      <div class=" col m8 s12 offset-m2">
+        <ul class="collection" id="items-output">
+
+          <!-- Items output -->
+
+        </ul>
+
+      </div>
+  </main>
+
+
+  <script src="https://kit.fontawesome.com/7f40b2a12d.js" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
