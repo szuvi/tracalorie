@@ -1,37 +1,78 @@
 // TODO :
-// 
+// - clean up the code, lots of repetition in App module
 // - error as helper text through materialize
 // - add and edit by pressing ENTER (key code 13)
-// - add local storage functionality
+// - ItemCtrl.setData - needs verification
 
 
-//Storage Controller
-// const StorageCtrl = (function(){
+//==========================================================================
+//      Storage Controller Module
+//==========================================================================
+const StorageCtrl = (function(){
   
-// })();
+  // Updates LS's data object by overwriting the current one
+  function updateStorage(data) {
+    let tempData = JSON.stringify(data);
+    localStorage.setItem('data', tempData);
+  }
 
-//UI Controller
+  // Return object in required form as in ItemCtrl, 
+  // if LS is empty returns empty object template
+  function getStorage() {
+    let data = localStorage.getItem('data');
+    
+    // getItem on emptied 'data' returns 'undefined' string (since it is JSON)
+    // so when comparing with null it doesn't return true
+    if (data == null || data == 'undefined') {
+      data = {
+        totalCalories: 0,
+        currItem: null,
+        items: []
+      };
+    } else {      
+      data = JSON.parse(data);
+    }
+    return data;
+  }
+
+  return {
+    updateStorage,
+    getStorage
+  }
+})();
+
+
+
+//==========================================================================
+//      UI Controller Module
+//==========================================================================
 const UICtrl = (function() {
   
   const elements = {
     output: '#items-output',
+    caloriesCount: '#calories-count',
     nameInput: '#meal-input',
     caloriesInput: '#calories-input',
+
     clearBtn: '#clear-btn',
-    addBtn: '#add-btn',
+    addBtn: '#add-btn',    
     editBtn: '#edit-btn',
     deleteBtn: '#delete-btn',
     backBtn: '#back-btn',
-    errorOutput: '#error-msg',
+
     errorCard: '#error-card',
-    caloriesCount: '#calories-count',
-    editItem: '.data-item',
+    errorOutput: '#error-msg',        
   };
     
-  function drawItems({totalCalories, items}) {    
+  // Takes and data object in a form specified in ItemCtrl and draws it to output
+  function drawItems({totalCalories, items}) {  
+    // Initial Clear
+    document.querySelector(elements.output).innerHTML = '';  
+
     let tmpHTML = '';
     
     items.forEach(item => {
+      // List item template for each meal output
       let li = `<li class="collection-item">
                   <div>
                       <b class="item-name">${item.name}:</b> 
@@ -52,14 +93,9 @@ const UICtrl = (function() {
     document.querySelector(elements.caloriesCount).innerText = calories;
   }
   
-  function clearItems() {
-    document.querySelector(elements.output).innerHTML = '';
-  }
+
   
-  function clearAll() {
-    clearItems();
-    updateTotalCalories(0);
-  }
+
   
   function getInput() {
     let name = document.querySelector(elements.nameInput).value;
@@ -83,6 +119,7 @@ const UICtrl = (function() {
   }
   
   function editState({currItem}) {
+    hideError();
     document.querySelector(elements.addBtn).classList.add('hide');
     document.querySelector(elements.editBtn).classList.remove('hide');
     document.querySelector(elements.deleteBtn).classList.remove('hide');
@@ -92,6 +129,7 @@ const UICtrl = (function() {
   }
   
   function addState() {
+    hideError();
     document.querySelector(elements.addBtn).classList.remove('hide');
     document.querySelector(elements.editBtn).classList.add('hide');
     document.querySelector(elements.deleteBtn).classList.add('hide');
@@ -102,50 +140,59 @@ const UICtrl = (function() {
   
   return {
     selectors: elements,
-    clearItems,
     drawItems,
     getInput,
     showError,
     hideError,
     clearInput,
-    clearAll,
     editState,
     addState
   }
 })();
 
-// Item Controller
-const ItemCtrl = (function() {
+
+//==========================================================================
+//      Item Controller Module
+//==========================================================================
+// Data object template:
+//  data = {
+//   totalCalories: 123,
+//       currItem: {id: 0, name: 'test item that is currently edited', calories: 123},
+//       items: [
+//         {id: 0, name: 'test item1 that is currently edited', calories: 123},
+//         {id: 1, name: 'test item2', calories: 321},
+//     ]
+// }
+const ItemCtrl = (function() {  
+  let data = {};  
   
-  let data = {
-    totalCalories: 0,
-    currItem: null,
-    items: []
+  function clearData() {
+    data = {
+      totalCalories: 0,
+      currItem: null,
+      items: []
+    }    
+  }
+
+  function setData(obj) { // TODO data verification
+    data = obj;
+  }
+
+  function getData() {
+    return data;
+  }
+
+  function logData() {
+    console.log(data);
   }
   
-  let error = '';
-  
-  // Item constructor
-  function Item(id, name, calories) {
-    this.id = id;
-    this.name = name;
-    this.calories = calories;
-  }
-  
-    function setItem(item) {
+  function setItem(item) {
     let tempItem = item;
     let id = getId();
     tempItem.id = id;
     data.items.push(tempItem);
-    updateCalories();      
+    updateTotalCalories();      
   }
-  
-  function updateCalories() {
-    data.totalCalories = 0;
-    data.items.forEach(item => data.totalCalories += item.calories);
-  }
-  
-
   
   function getId() {
     if (data.items.length == 0) {
@@ -159,6 +206,11 @@ const ItemCtrl = (function() {
       });
       return id + 1;
     }
+  }
+  
+  function updateTotalCalories() {
+    data.totalCalories = 0;
+    data.items.forEach(item => data.totalCalories += item.calories);
   }
   
   function verifyItem(item) {
@@ -179,22 +231,10 @@ const ItemCtrl = (function() {
     
     return response;
   }
-  
-  function getData() {
-    return data;
-  }
-  
-  function getError() {
-    return error;
-  }
-  
-  function logData() {
-    console.log(data);
-  }
-  
+    
   function setCurrentItem(id) {
     data.currItem = data.items.find(item => item.id == id);
-    console.log(data.currItem);
+    console.log(data.currItem); // TODO for test only
   }
   
   function updateItem(item) {
@@ -205,15 +245,7 @@ const ItemCtrl = (function() {
       }
     });
     data.currItem = null;
-    updateCalories();
-  }
-  
-  function clearData() {
-    data = {
-      totalCalories: 0,
-      currItem: null,
-      items: []
-    }    
+    updateTotalCalories();
   }
   
   function deleteCurrentItem() {
@@ -226,85 +258,38 @@ const ItemCtrl = (function() {
         return true;        
       }      
     });
-    updateCalories();
+    updateTotalCalories();
   }
-  
-  return {
-    logData,
+
+  return {    
+    clearData,
+    setData,
     getData,
+    logData,
+
     setItem,
     verifyItem,
     setCurrentItem,
-    updateItem,
-    clearData,
+    updateItem,    
     deleteCurrentItem
   }
 })();
 
-// App Controller
+
+//==========================================================================
+//      App Module
+//==========================================================================
 const App = (function(UICtrl, ItemCtrl) {
   // Event Listeners 
-  const eventListeners = function eventListeners() {
+  function loadEventListeners() {
     document.querySelector(UICtrl.selectors.addBtn).addEventListener('click', addMeal);
     document.querySelector(UICtrl.selectors.clearBtn).addEventListener('click', clearMeals);
-    document.querySelector(UICtrl.selectors.output).addEventListener('click', editItem);
+    document.querySelector(UICtrl.selectors.output).addEventListener('click', editItemState);
     document.querySelector(UICtrl.selectors.editBtn).addEventListener('click', updateMeal);
     document.querySelector(UICtrl.selectors.deleteBtn).addEventListener('click', deleteMeal);
     document.querySelector(UICtrl.selectors.backBtn).addEventListener('click', returnToAdd);  
   }
-  
-  function returnToAdd(event) {
-    event.preventDefault();
-    UICtrl.addState();
-  }
-  
-  function deleteMeal(event) {
-    event.preventDefault();    
-       
-    UICtrl.hideError();
-    ItemCtrl.deleteCurrentItem();
-    ItemCtrl.logData();
-    UICtrl.clearItems();
-    UICtrl.drawItems(ItemCtrl.getData());
-    UICtrl.clearInput();     
-    UICtrl.addState();
-    
-  }
-  
-  function clearMeals(event) {
-    event.preventDefault();
-    UICtrl.clearAll();
-    ItemCtrl.clearData();
-  }
-  
-  function updateMeal(event) {
-    event.preventDefault();
-    
-    let input = UICtrl.getInput();
-    const verification = ItemCtrl.verifyItem(input);
-    if (verification.isVerified) {
-      UICtrl.hideError();
-      ItemCtrl.updateItem(input);
-      UICtrl.clearItems();
-      UICtrl.drawItems(ItemCtrl.getData());
-      UICtrl.clearInput();     
-      UICtrl.addState();
-    } else {
-      UICtrl.showError(verification.errorMsg);
-    }
-  }
-  
-  function editItem(event) {
-    event.preventDefault();
-    
-    if (event.target.classList.contains('data-item')) {
-      const id = event.target.getAttribute('data-id');
-      
-      ItemCtrl.setCurrentItem(id);
-      UICtrl.editState(ItemCtrl.getData());
-    }
-  }
-  
+
   function addMeal(event) {
     event.preventDefault();
      
@@ -314,23 +299,83 @@ const App = (function(UICtrl, ItemCtrl) {
     console.log(verification); // TODO for TEST ONLY
     
     if (verification.isVerified) {
+      let data;
       UICtrl.hideError();
       ItemCtrl.setItem(input);     
-      UICtrl.clearItems();
-      UICtrl.drawItems(ItemCtrl.getData());
+      
+      data = ItemCtrl.getData();
+      UICtrl.drawItems(data);
+      StorageCtrl.updateStorage(data);
       UICtrl.clearInput();
     } else {
       UICtrl.showError(verification.errorMsg);
     }
   }
+
+  function clearMeals(event) {
+    event.preventDefault();
+    // UICtrl.clearAll();
+    ItemCtrl.clearData();    
+    let data = ItemCtrl.getData();
+    UICtrl.drawItems(data);
+    StorageCtrl.updateStorage(data);
+  }
+  
+  function editItemState(event) {
+    event.preventDefault();
+    
+    if (event.target.classList.contains('data-item')) {
+      const id = event.target.getAttribute('data-id');
+      
+      ItemCtrl.setCurrentItem(id);
+      UICtrl.editState(ItemCtrl.getData());
+    }
+  }
+
+  function updateMeal(event) {
+    event.preventDefault();
+    
+    let input = UICtrl.getInput();
+    const verification = ItemCtrl.verifyItem(input);
+    if (verification.isVerified) {
+      UICtrl.hideError();
+      ItemCtrl.updateItem(input);      
+      let data = ItemCtrl.getData();
+      UICtrl.drawItems(data);
+      StorageCtrl.updateStorage(data);
+      UICtrl.clearInput();     
+      UICtrl.addState();
+    } else {
+      UICtrl.showError(verification.errorMsg);
+    }
+  }
+
+  function deleteMeal(event) {
+    event.preventDefault();    
+    
+    let data;
+    UICtrl.hideError();
+    ItemCtrl.deleteCurrentItem();
+    ItemCtrl.logData();    
+    data = ItemCtrl.getData();
+    UICtrl.drawItems(data);
+    StorageCtrl.updateStorage(data);
+    UICtrl.clearInput();     
+    UICtrl.addState();
+    
+  }
+
+  function returnToAdd(event) {
+    event.preventDefault();
+    UICtrl.addState();
+  }  
   
   function init() {
-    //Load event listeners
-    eventListeners();
-    
-    UICtrl.clearItems();
-    UICtrl.drawItems(ItemCtrl.getData());       
-    
+    // Initialize Data
+    ItemCtrl.setData(StorageCtrl.getStorage());
+
+    loadEventListeners();        
+    UICtrl.drawItems(ItemCtrl.getData());          
   }
   return {
     init
