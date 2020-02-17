@@ -1,19 +1,9 @@
 // TODO :
-// - fix tooltip materialize
+// 
 // - error as helper text through materialize
 // - add and edit by pressing ENTER (key code 13)
-// - fix edit/del btn <<< codepen bug? to investigate / fix
-// - error message persisting - to fix
 // - add local storage functionality
 
-
-// Materialize tooltip addon
-
-M.AutoInit();
-document.addEventListener('DOMContentLoaded', function() {
-    var elems = document.querySelectorAll('.tooltipped');
-    var instances = M.Tooltip.init(elems,{enterDelay: 500, outDuration: 50});
-  });
 
 //Storage Controller
 // const StorageCtrl = (function(){
@@ -42,7 +32,15 @@ const UICtrl = (function() {
     let tmpHTML = '';
     
     items.forEach(item => {
-      let li = `<li class="collection-item"><div><b class="item-name">${item.name}:</b> ${item.calories} Calories<a href="#!" class="secondary-content tooltipped" data-position="left" data-tooltip="Edit"><i data-id="${item.id}" class="material-icons yellow-text text-darken-2 data-item">edit</i></a></div></li>`;
+      let li = `<li class="collection-item">
+                  <div>
+                      <b class="item-name">${item.name}:</b> 
+                      ${item.calories} Calories
+                      <a href="#!" class="secondary-content" >
+                        <i data-id="${item.id}" class="material-icons yellow-text text-darken-2 data-item">edit</i>
+                      </a>
+                  </div>
+                </li>`;
       tmpHTML += li;
     });
     
@@ -261,19 +259,16 @@ const App = (function(UICtrl, ItemCtrl) {
   }
   
   function deleteMeal(event) {
-    event.preventDefault();
-    
+    event.preventDefault();    
        
-      
-      ItemCtrl.deleteCurrentItem();
-      ItemCtrl.logData();
-      UICtrl.clearItems();
-      UICtrl.drawItems(ItemCtrl.getData());
-      UICtrl.clearInput();     
-      UICtrl.addState();
+    UICtrl.hideError();
+    ItemCtrl.deleteCurrentItem();
+    ItemCtrl.logData();
+    UICtrl.clearItems();
+    UICtrl.drawItems(ItemCtrl.getData());
+    UICtrl.clearInput();     
+    UICtrl.addState();
     
-    //del if from items
-    //update
   }
   
   function clearMeals(event) {
